@@ -1,0 +1,9 @@
+{
+  "name": "global-ai-skills",
+  "version": "1.0.0",
+  "description": "One-command installer for a combined set of AI agent skills",
+  "bin": {
+    "global-ai-skills": "bin/install.js"
+  },
+  "license": "MIT"
+}

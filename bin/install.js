@@ -38,9 +38,10 @@ function availableFlags(folders) {
 }
 
 function parseArgs(argv) {
-  const args = { flags: [], project: false, dir: null, help: false };
+  const args = { flags: [], project: false, dir: null, help: false, update: false };
   for (const arg of argv) {
     if (arg === '--help' || arg === '-h') args.help = true;
+    else if (arg === '--update' || arg === '-u') args.update = true;
     else if (arg === '--all') args.flags.push('--all');
     else if (arg === '--project' || arg === '-p') args.project = true;
     else if (arg.startsWith('--dir=')) args.dir = arg.slice('--dir='.length);
@@ -80,8 +81,15 @@ function copyDir(src, dest) {
 function install(folder, base) {
   const src = path.join(SKILLS_DIR, folder);
   const dest = path.join(base, folder);
+  fs.rmSync(dest, { recursive: true, force: true }); // clean copy: drop stale files
   copyDir(src, dest);
   console.log(`Installed "${folder}" -> ${dest}`);
+}
+
+// Skills already present in the target dir (a folder with a SKILL.md that we ship).
+function installedFolders(base, folders) {
+  if (!fs.existsSync(base)) return [];
+  return folders.filter((f) => fs.existsSync(path.join(base, f, 'SKILL.md')));
 }
 
 function printHelp(flags) {
@@ -98,6 +106,7 @@ Install specific skills:
 ${flags.map((f) => `  --${f}`).join('\n')}
 
 Options:
+  --update, -u   Refresh already-installed skills to the latest version
   --project      Install to ./.claude/skills instead of ~/.claude/skills
   --dir=<path>   Install to a custom directory
   -h, --help     Show this help
@@ -106,6 +115,8 @@ Examples:
   npx github:ejjat0909/global-ai-skills --anti-slop
   npx github:ejjat0909/global-ai-skills --anti-slop --ui-ux-pro-max
   npx github:ejjat0909/global-ai-skills --mobile-app-setup --project
+  npx github:ejjat0909/global-ai-skills --update
+  npx github:ejjat0909/global-ai-skills --update --anti-slop
 `);
 }
 
@@ -118,9 +129,33 @@ function main() {
 
   const base = targetBase(args);
   const requested = args.flags.filter((f) => f !== '--all');
-  const installAll = args.flags.includes('--all') || requested.length === 0;
 
   let targets;
+
+  if (args.update) {
+    // Update mode: refresh only skills already present in the target dir.
+    // With skill flags, update just those (that are installed); without, update all installed.
+    let candidates;
+    try {
+      candidates = requested.length ? resolveFolders(requested, folders) : folders;
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    const installed = installedFolders(base, folders);
+    targets = candidates.filter((f) => installed.includes(f));
+    if (targets.length === 0) {
+      console.log(`Nothing to update — no matching skills installed in ${base}`);
+      return;
+    }
+    fs.mkdirSync(base, { recursive: true });
+    for (const t of targets) install(t, base);
+    console.log(`\nUpdated ${targets.length} skill folder(s) in ${base}`);
+    return;
+  }
+
+  const installAll = args.flags.includes('--all') || requested.length === 0;
+
   try {
     targets = installAll ? folders : resolveFolders(requested, folders);
   } catch (e) {

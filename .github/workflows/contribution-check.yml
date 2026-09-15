@@ -1,0 +1,108 @@
+name: Contribution structure check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Mirrors docs/ADDING-SKILLS-AND-PLUGINS.md section 4 "final checklist" —
+      # keep this in sync if that section changes.
+
+      - name: groups.json and plugins.json are valid JSON
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('groups.json','utf8'));console.log('groups.json OK')"
+          node -e "JSON.parse(require('fs').readFileSync('plugins.json','utf8'));console.log('plugins.json OK')"
+
+      - name: installer is dependency-free and runs
+        run: |
+          test ! -f package-lock.json && echo "no lockfile (installer stays zero-dependency) OK"
+          node -c bin/install.js
+          node bin/install.js --help > /dev/null
+          echo "installer OK"
+
+      - name: every skills/* folder has a top-level SKILL.md
+        run: |
+          fail=0
+          for d in skills/*/; do
+            name="${d%/}"
+            if [ ! -f "$name/SKILL.md" ]; then
+              echo "::error::$name is missing a top-level SKILL.md"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: no nested .git under skills/
+        run: |
+          hits="$(find skills -name .git 2>/dev/null)"
+          if [ -n "$hits" ]; then
+            echo "::error::nested .git found:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "no nested .git OK"
+
+      - name: every groups.json entry points at real skill folders
+        run: |
+          node -e "
+          const fs = require('fs');
+          const groups = JSON.parse(fs.readFileSync('groups.json', 'utf8'));
+          const folders = new Set(fs.readdirSync('skills'));
+          let ok = true;
+          for (const [flag, list] of Object.entries(groups)) {
+            for (const f of list) {
+              if (!folders.has(f)) {
+                console.error(\`::error::groups.json[\${flag}] references missing folder skills/\${f}\`);
+                ok = false;
+              }
+            }
+          }
+          process.exit(ok ? 0 : 1);
+          "
+
+      - name: every plugins.json entry has a package name
+        run: |
+          node -e "
+          const fs = require('fs');
+          const plugins = JSON.parse(fs.readFileSync('plugins.json', 'utf8'));
+          let ok = true;
+          for (const [name, def] of Object.entries(plugins)) {
+            if (!def.package) {
+              console.error(\`::error::plugins.json[\${name}] is missing 'package'\`);
+              ok = false;
+            }
+          }
+          process.exit(ok ? 0 : 1);
+          "
+
+      - name: install-all (skills only) works end to end
+        run: |
+          node bin/install.js --no-plugins --dir=/tmp/ci-install
+          count=$(ls /tmp/ci-install | wc -l)
+          echo "installed $count skill folder(s)"
+          test "$count" -gt 0
+
+      - name: --update refreshes and drops stale files
+        run: |
+          echo STALE > /tmp/ci-install/mobile-app-setup/JUNK.md
+          node bin/install.js --update --no-plugins --dir=/tmp/ci-install
+          test ! -f /tmp/ci-install/mobile-app-setup/JUNK.md && echo "update drops stale files OK"
+
+      - name: root agent-instruction files exist and point at the guide
+        run: |
+          for f in AGENTS.md CLAUDE.md .cursorrules .github/copilot-instructions.md; do
+            test -f "$f" || { echo "::error::missing $f"; exit 1; }
+            grep -q "docs/ADDING-SKILLS-AND-PLUGINS.md" "$f" || { echo "::error::$f does not reference the A-Z guide"; exit 1; }
+          done
+          test -f docs/ADDING-SKILLS-AND-PLUGINS.md && echo "agent instruction files OK"

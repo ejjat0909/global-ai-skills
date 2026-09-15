@@ -8,6 +8,7 @@ const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const SKILLS_DIR = path.join(ROOT, 'skills');
+const PLUGINS_DIR = path.join(ROOT, 'plugins');
 
 function loadJson(name, fallback) {
   const f = path.join(ROOT, name);
@@ -105,19 +106,30 @@ function installedFolders(base, folders) {
   return folders.filter((f) => fs.existsSync(path.join(base, f, 'SKILL.md')));
 }
 
-// Install/update the npm plugins in plugins.json globally. `npm install -g <pkg>`
-// is idempotent and also upgrades to latest, so it serves both install and update.
+// Install/update the plugins in plugins.json. Two types:
+//  - npm (default): `npm install -g <package>`, idempotent, also serves as update.
+//  - script: run a bundled shell script (e.g. one-machine setup like symlinks).
 function installPlugins() {
   const names = Object.keys(PLUGINS);
   if (names.length === 0) return;
-  const hasNpm = spawnSync('npm', ['--version'], { stdio: 'ignore' }).status === 0;
-  if (!hasNpm) {
-    console.warn('\nSkipping plugins: npm not found on PATH. Install Node.js to get plugins.');
-    return;
-  }
-  console.log('\nInstalling plugins (npm -g):');
+  console.log('\nInstalling plugins:');
   for (const name of names) {
-    const pkg = PLUGINS[name].package;
+    const plugin = PLUGINS[name];
+    const type = plugin.type || 'npm';
+    if (type === 'script') {
+      const scriptPath = path.join(PLUGINS_DIR, plugin.script);
+      process.stdout.write(`  ${name} (script) ... \n`);
+      const r = spawnSync('bash', [scriptPath], { stdio: 'inherit' });
+      if (r.status === 0) console.log(`  ✓ ${name} set up`);
+      else console.warn(`  ✗ ${name} failed (exit ${r.status}) — run manually: bash ${scriptPath}`);
+      continue;
+    }
+    const hasNpm = spawnSync('npm', ['--version'], { stdio: 'ignore' }).status === 0;
+    if (!hasNpm) {
+      console.warn(`  ✗ ${name}: npm not found on PATH. Install Node.js to get this plugin.`);
+      continue;
+    }
+    const pkg = plugin.package;
     process.stdout.write(`  ${name} (${pkg}) ... `);
     const r = spawnSync('npm', ['install', '-g', pkg], { stdio: 'inherit' });
     if (r.status === 0) console.log(`  ✓ ${name} installed`);
@@ -146,7 +158,7 @@ Options:
   --dir=<path>    Install to a custom directory
   -h, --help      Show this help
 
-Plugins (npm packages installed globally, on by default):
+Plugins (installed globally / set up on this machine, on by default):
 ${Object.keys(PLUGINS).length
     ? Object.entries(PLUGINS).map(([n, p]) => `  ${n} — ${p.description || p.package}`).join('\n')
     : '  (none)'}

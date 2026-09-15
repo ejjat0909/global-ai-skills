@@ -50,8 +50,11 @@ and `description:` (CI checks this). Full guide with frontmatter template:
 
 ## Add a plugin
 
-Plugins are published npm packages (agent tooling — browsers, MCP servers, etc.)
-installed globally, not vendored into `skills/`. To add one:
+Plugins are either a published npm package (agent tooling — browsers, MCP
+servers, etc.), installed globally, or a local setup script (machine config —
+symlinks, scaffolding). Never vendored into `skills/`.
+
+### npm plugin
 
 1. Add an entry to `plugins.json`:
 
@@ -70,6 +73,12 @@ installed globally, not vendored into `skills/`. To add one:
 3. Test: `node bin/install.js --plugins-only` — the package should install and
    its `bin` land on your PATH.
 4. Add it to the *Plugins* table in the README.
+
+### Custom (script) plugin — one you wrote yourself
+
+Full guide: [docs/ADDING-CUSTOM-PLUGINS.md](docs/ADDING-CUSTOM-PLUGINS.md).
+Put your script under `plugins/<name>/`, reference it in `plugins.json` with
+`"type": "script"`, make it idempotent, test with `--plugins-only` twice.
 
 ## Guidelines
 

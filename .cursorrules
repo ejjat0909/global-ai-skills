@@ -19,6 +19,10 @@ Writing a brand-new skill from scratch (not vendored from elsewhere)? Use
 `docs/ADDING-CUSTOM-SKILLS.md` instead — same repo/installer rules, focused on
 authoring `SKILL.md` frontmatter and content.
 
+Writing a brand-new plugin from scratch (a local setup script, not an npm
+package)? Use `docs/ADDING-CUSTOM-PLUGINS.md` — covers `plugins.json`'s
+`type: "script"` shape and the idempotency requirement.
+
 ## Fast facts (the guide has the full detail)
 
 - Skills are folders under `skills/` containing a `SKILL.md`. The folder name

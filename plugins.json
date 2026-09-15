@@ -1,8 +1,15 @@
 {
   "camofox-browser": {
+    "type": "npm",
     "package": "@askjo/camofox-browser",
     "bin": ["camofox-browser", "camofox-browser-mcp"],
     "description": "Anti-detection Camoufox browser + MCP server for AI agents",
     "source": "https://github.com/jo-inc/camofox-browser"
+  },
+  "shared-ai-memory": {
+    "type": "script",
+    "script": "shared-ai-memory/setup.sh",
+    "description": "Symlinks every AI agent's memory/skills dir to ~/.shared-ai-memory and ~/.shared-ai-skills",
+    "source": "plugins/shared-ai-memory/setup.sh"
   }
 }

@@ -74,18 +74,29 @@ jobs:
           process.exit(ok ? 0 : 1);
           "
 
-      - name: every plugins.json entry has a package name
+      - name: every plugins.json entry is valid (npm package or script file present)
         run: |
           node -e "
           const fs = require('fs');
           const plugins = JSON.parse(fs.readFileSync('plugins.json', 'utf8'));
           let ok = true;
           for (const [name, def] of Object.entries(plugins)) {
-            if (!def.package) {
-              console.error(\`::error::plugins.json[\${name}] is missing 'package'\`);
+            const type = def.type || 'npm';
+            if (type === 'npm' && !def.package) {
+              console.error(\`::error::plugins.json[\${name}] type=npm is missing 'package'\`);
+              ok = false;
+            } else if (type === 'script') {
+              const scriptPath = require('path').join('plugins', def.script || '');
+              if (!def.script || !fs.existsSync(scriptPath)) {
+                console.error(\`::error::plugins.json[\${name}] script not found: \${scriptPath}\`);
+                ok = false;
+              }
+            } else if (type !== 'npm' && type !== 'script') {
+              console.error(\`::error::plugins.json[\${name}] unknown type '\${type}'\`);
               ok = false;
             }
           }
+          console.log(ok ? 'plugins refs OK' : 'FAIL');
           process.exit(ok ? 0 : 1);
           "
 

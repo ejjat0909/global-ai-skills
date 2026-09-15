@@ -65,14 +65,17 @@ bundle. Group membership is defined in `groups.json`.
 
 ## Plugins
 
-Plugins are npm packages (agent tooling like browsers / MCP servers) installed
-**globally** so your AI agent gets their CLI and MCP binaries. They install
-**by default** alongside skills — every skill install also installs the plugins,
-unless you pass `--no-plugins`.
+Plugins install **by default** alongside skills (unless `--no-plugins`). Two
+kinds:
+- **npm**: a published package, installed globally so its CLI/MCP binaries are
+  on PATH.
+- **script**: a bundled local setup script for machine config (symlinks,
+  scaffolding) — runs via `bash`, no npm involved.
 
-| Plugin | Package | Source |
-|--------|---------|--------|
-| `camofox-browser` | `@askjo/camofox-browser` | github.com/jo-inc/camofox-browser |
+| Plugin | Type | What it does | Source |
+|--------|------|---------------|--------|
+| `camofox-browser` | npm | Installs `@askjo/camofox-browser` globally | github.com/jo-inc/camofox-browser |
+| `shared-ai-memory` | script | Symlinks every AI agent's memory/skills dir on this machine to `~/.shared-ai-memory` / `~/.shared-ai-skills` | authored in this repo |
 
 ```bash
 npx github:ejjat0909/global-ai-skills                 # skills + plugins (default)
@@ -81,10 +84,10 @@ npx github:ejjat0909/global-ai-skills --plugins-only  # plugins only, no skills
 npx github:ejjat0909/global-ai-skills --update        # updates installed skills + plugins
 ```
 
-Plugins need Node/npm on PATH (npx already implies that). `npm install -g` both
-installs and upgrades, so `--update` refreshes plugins to their latest version.
-If a plugin fails to install, the command keeps going and prints the manual
-`npm install -g <pkg>` to run.
+npm plugins need Node/npm on PATH (npx already implies that); `npm install -g`
+both installs and upgrades, so `--update` refreshes them. Script plugins are
+written to be idempotent — safe to re-run on every install/update. If a plugin
+fails, the command keeps going and prints how to run it manually.
 
 ## Options
 
@@ -114,7 +117,8 @@ skills/
   antislop-ui/            SKILL.md
   ...                     292 more from the ecc bundle
 groups.json               skill bundle definitions (--anti-slop, --ecc)
-plugins.json              npm plugin definitions (camofox-browser)
+plugins.json              plugin definitions (npm packages + local scripts)
+plugins/                  local script plugins (e.g. shared-ai-memory/setup.sh)
 bin/install.js            zero-dependency installer
 ```
 
@@ -128,17 +132,19 @@ bin/install.js            zero-dependency installer
 - Install/update copies whole skill folders into the target `.claude/skills`
   directory. Update deletes each target folder first, then copies fresh, so
   removed or renamed files don't linger.
-- Plugins listed in `plugins.json` are installed globally via `npm install -g`
-  after skills (unless `--no-plugins`), so their CLI/MCP binaries are available
-  to the agent.
+- Plugins listed in `plugins.json` install after skills (unless `--no-plugins`):
+  `type: "npm"` (default) runs `npm install -g <package>`; `type: "script"` runs
+  a bundled script under `plugins/<name>/` for local machine setup.
 
 ## Adding a new skill
 
 1. Drop a folder with a `SKILL.md` under `skills/`.
 2. If it's a multi-folder bundle, add it to `groups.json`.
 
-To add a **plugin**, add an entry to `plugins.json` with its published npm
-package name.
+To add a **plugin**: an npm package needs only an entry in `plugins.json` with
+its published package name; a custom local-setup plugin needs a script under
+`plugins/<name>/` plus a `plugins.json` entry with `"type": "script"` — see
+[docs/ADDING-CUSTOM-PLUGINS.md](docs/ADDING-CUSTOM-PLUGINS.md).
 
 That's it — the folder name becomes its `--flag`, and `--all` / `--update` pick
 it up automatically.

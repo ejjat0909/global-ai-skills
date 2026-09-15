@@ -40,6 +40,14 @@ Contributions that add a new skill or fix an existing one are welcome.
 6. **Open a PR** describing the skill and where it came from. Keep unrelated
    changes out of the diff.
 
+## Add a custom skill (one you authored yourself)
+
+Not vendoring an existing skill from elsewhere — writing a brand-new one from
+scratch. Same steps as "Add a skill" above (folder, `groups.json` if it's a
+bundle, test, README), plus your `SKILL.md` frontmatter **must** have `name:`
+and `description:` (CI checks this). Full guide with frontmatter template:
+[docs/ADDING-CUSTOM-SKILLS.md](docs/ADDING-CUSTOM-SKILLS.md).
+
 ## Add a plugin
 
 Plugins are published npm packages (agent tooling — browsers, MCP servers, etc.)

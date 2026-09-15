@@ -10,17 +10,17 @@ Contributions that add a new skill or fix an existing one are welcome.
    `skills/my-skill/`). It must contain a `SKILL.md`. Supporting files
    (`references/`, `scripts/`, `data/`, etc.) can sit alongside it and are
    copied as-is.
-3. **Bundle of several folders?** (like anti-slop's 6 skills) — add an entry to
-   the `GROUPS` map at the top of `bin/install.js` so one flag installs them all:
+3. **Bundle of several folders?** (like anti-slop's 6 skills or ecc's 292) — add
+   an entry to `groups.json` so one flag installs them all:
 
-   ```js
-   const GROUPS = {
-     'my-bundle': ['my-skill-core', 'my-skill-ui', 'my-skill-code'],
-   };
+   ```json
+   {
+     "my-bundle": ["my-skill-core", "my-skill-ui", "my-skill-code"]
+   }
    ```
 
-   Skills not listed in `GROUPS` are standalone and get a `--<folder-name>` flag
-   automatically — no code change needed.
+   Skills not listed in `groups.json` are standalone and get a `--<folder-name>`
+   flag automatically — no code change needed.
 4. **Test locally** before opening a PR:
 
    ```bash

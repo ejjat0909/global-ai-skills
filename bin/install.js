@@ -8,18 +8,21 @@ const os = require('os');
 const ROOT = path.join(__dirname, '..');
 const SKILLS_DIR = path.join(ROOT, 'skills');
 
-// Group flag -> skill folders under skills/. A flag not listed here maps to a
-// single folder of the same name (e.g. --ui-ux-pro-max -> skills/ui-ux-pro-max).
-const GROUPS = {
-  'anti-slop': [
-    'antislop',
-    'antislop-code',
-    'antislop-copywriting',
-    'antislop-human',
-    'antislop-layoutmobile',
-    'antislop-ui',
-  ],
-};
+// Group flag -> skill folders under skills/. Loaded from groups.json (data, not
+// code) so large bundles don't bloat this file. A flag not listed there maps to
+// a single folder of the same name (e.g. --ui-ux-pro-max -> skills/ui-ux-pro-max).
+function loadGroups() {
+  const f = path.join(ROOT, 'groups.json');
+  if (!fs.existsSync(f)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch (e) {
+    console.error(`Failed to parse groups.json: ${e.message}`);
+    process.exit(1);
+  }
+}
+
+const GROUPS = loadGroups();
 
 function listSkillFolders() {
   return fs

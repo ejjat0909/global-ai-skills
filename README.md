@@ -57,8 +57,10 @@ If nothing matching is installed there, it says so and does nothing.
 | `--mobile-app-setup` | `mobile-app-setup` | github.com/ejjat0909/mobile-app-setup |
 | `--ui-ux-pro-max` | `ui-ux-pro-max` | github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `--anti-slop` | `antislop`, `antislop-code`, `antislop-copywriting`, `antislop-human`, `antislop-layoutmobile`, `antislop-ui` | github.com/miqdadbadjuber/anti-slop |
+| `--ecc` | 292 ECC skills (accessibility, api-design, agent-*, benchmark, brand-voice, security-review, tdd-workflow, …) | github.com/affaan-m/ecc |
 
-`--anti-slop` is a group: it installs the core `antislop` skill plus its 5 companion skills.
+`--anti-slop` and `--ecc` are groups: one flag installs all the folders in that
+bundle. Group membership is defined in `groups.json`.
 
 ## Options
 
@@ -92,8 +94,8 @@ bin/install.js            zero-dependency installer
 - The installer is a single zero-dependency Node script (`bin/install.js`).
 - Each folder under `skills/` containing a `SKILL.md` is an installable skill;
   its folder name becomes its `--flag` automatically.
-- Multi-folder bundles (like anti-slop) are declared in the `GROUPS` map in
-  `bin/install.js`, so one flag installs several folders.
+- Multi-folder bundles (like anti-slop and ecc) are declared in `groups.json`,
+  so one flag installs several folders.
 - Install/update copies whole skill folders into the target `.claude/skills`
   directory. Update deletes each target folder first, then copies fresh, so
   removed or renamed files don't linger.

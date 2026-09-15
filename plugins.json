@@ -1,0 +1,8 @@
+{
+  "camofox-browser": {
+    "package": "@askjo/camofox-browser",
+    "bin": ["camofox-browser", "camofox-browser-mcp"],
+    "description": "Anti-detection Camoufox browser + MCP server for AI agents",
+    "source": "https://github.com/jo-inc/camofox-browser"
+  }
+}

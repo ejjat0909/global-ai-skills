@@ -36,6 +36,29 @@ Contributions that add a new skill or fix an existing one are welcome.
 6. **Open a PR** describing the skill and where it came from. Keep unrelated
    changes out of the diff.
 
+## Add a plugin
+
+Plugins are published npm packages (agent tooling — browsers, MCP servers, etc.)
+installed globally, not vendored into `skills/`. To add one:
+
+1. Add an entry to `plugins.json`:
+
+   ```json
+   {
+     "my-plugin": {
+       "package": "@scope/my-plugin",
+       "bin": ["my-plugin"],
+       "description": "What it does",
+       "source": "https://github.com/owner/repo"
+     }
+   }
+   ```
+
+2. It must be published to npm (the installer runs `npm install -g <package>`).
+3. Test: `node bin/install.js --plugins-only` — the package should install and
+   its `bin` land on your PATH.
+4. Add it to the *Plugins* table in the README.
+
 ## Guidelines
 
 - **One skill = one folder** with a `SKILL.md`. Don't nest skills.

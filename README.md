@@ -62,12 +62,37 @@ If nothing matching is installed there, it says so and does nothing.
 `--anti-slop` and `--ecc` are groups: one flag installs all the folders in that
 bundle. Group membership is defined in `groups.json`.
 
+## Plugins
+
+Plugins are npm packages (agent tooling like browsers / MCP servers) installed
+**globally** so your AI agent gets their CLI and MCP binaries. They install
+**by default** alongside skills — every skill install also installs the plugins,
+unless you pass `--no-plugins`.
+
+| Plugin | Package | Source |
+|--------|---------|--------|
+| `camofox-browser` | `@askjo/camofox-browser` | github.com/jo-inc/camofox-browser |
+
+```bash
+npx github:ejjat0909/global-ai-skills                 # skills + plugins (default)
+npx github:ejjat0909/global-ai-skills --no-plugins    # skills only
+npx github:ejjat0909/global-ai-skills --plugins-only  # plugins only, no skills
+npx github:ejjat0909/global-ai-skills --update        # updates installed skills + plugins
+```
+
+Plugins need Node/npm on PATH (npx already implies that). `npm install -g` both
+installs and upgrades, so `--update` refreshes plugins to their latest version.
+If a plugin fails to install, the command keeps going and prints the manual
+`npm install -g <pkg>` to run.
+
 ## Options
 
 | Option | Effect |
 |--------|--------|
 | `--all` | Install every skill (same as passing no skill flag) |
-| `--update`, `-u` | Refresh already-installed skills to the latest version |
+| `--update`, `-u` | Refresh already-installed skills **and** plugins to the latest version |
+| `--no-plugins` | Skip plugin installation (skills only) |
+| `--plugins-only` | Install/update only the plugins, no skills |
 | `--project` | Install/update in `./.claude/skills` instead of `~/.claude/skills` |
 | `--dir=<path>` | Install/update in a custom directory |
 | `-h`, `--help` | Show help |
@@ -86,6 +111,9 @@ skills/
   antislop-human/         SKILL.md + contrast checker
   antislop-layoutmobile/  SKILL.md
   antislop-ui/            SKILL.md
+  ...                     292 more from the ecc bundle
+groups.json               skill bundle definitions (--anti-slop, --ecc)
+plugins.json              npm plugin definitions (camofox-browser)
 bin/install.js            zero-dependency installer
 ```
 
@@ -99,11 +127,17 @@ bin/install.js            zero-dependency installer
 - Install/update copies whole skill folders into the target `.claude/skills`
   directory. Update deletes each target folder first, then copies fresh, so
   removed or renamed files don't linger.
+- Plugins listed in `plugins.json` are installed globally via `npm install -g`
+  after skills (unless `--no-plugins`), so their CLI/MCP binaries are available
+  to the agent.
 
 ## Adding a new skill
 
 1. Drop a folder with a `SKILL.md` under `skills/`.
-2. If it's a multi-folder bundle, add it to `GROUPS` in `bin/install.js`.
+2. If it's a multi-folder bundle, add it to `groups.json`.
+
+To add a **plugin**, add an entry to `plugins.json` with its published npm
+package name.
 
 That's it — the folder name becomes its `--flag`, and `--all` / `--update` pick
 it up automatically.

@@ -157,3 +157,4 @@ full A–Z guide (with required testing steps) on adding a skill or plugin. AI
 agents: an `AGENTS.md` / `CLAUDE.md` at the repo root points you to that guide
 automatically.
 
+x

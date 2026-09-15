@@ -144,5 +144,9 @@ it up automatically.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add a skill, test it, and open a PR.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for a quick start, and
+**[docs/ADDING-SKILLS-AND-PLUGINS.md](docs/ADDING-SKILLS-AND-PLUGINS.md)** for the
+full A–Z guide (with required testing steps) on adding a skill or plugin. AI
+agents: an `AGENTS.md` / `CLAUDE.md` at the repo root points you to that guide
+automatically.
 

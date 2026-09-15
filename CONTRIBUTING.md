@@ -2,6 +2,10 @@
 
 Contributions that add a new skill or fix an existing one are welcome.
 
+> **Full A–Z guide with mandatory testing steps:**
+> [docs/ADDING-SKILLS-AND-PLUGINS.md](docs/ADDING-SKILLS-AND-PLUGINS.md).
+> The quick version is below; the guide has every command and every test.
+
 ## Add a skill
 
 1. **Fork and clone** this repo.

@@ -3,6 +3,13 @@
 # truth for every AI agent on this machine, symlinking each agent's own
 # memory/skills path to the shared dir. Safe to re-run (idempotent) — restores
 # any symlink an agent update clobbered.
+#
+# Also: before symlinking, extracts any *.md memory files already sitting in
+# each agent's real (non-symlink) memory dir into the shared dir, so nothing
+# gets lost — just backed up. And it appends a read-shared-memory-first
+# instruction block to each agent's global instruction file, so once this
+# plugin is installed the agent reads + updates the shared memory and infers
+# user personality/preferences from it before responding, without being told.
 set -o pipefail
 
 SHARED_MEMORY_DIR="$HOME/.shared-ai-memory"
@@ -18,6 +25,26 @@ echo "========================================="
 echo "Shared memory: $SHARED_MEMORY_DIR"
 echo "Shared skills: $SHARED_SKILLS_DIR"
 echo ""
+
+# Merge any *.md memory files already in a real dir into the shared dir before
+# it gets replaced by a symlink, so existing notes aren't stranded in a backup.
+extract_memory() {
+    local real_dir=$1
+    local description=$2
+    [ -d "$real_dir" ] && [ ! -L "$real_dir" ] || return
+    local found=0
+    while IFS= read -r -d '' f; do
+        found=1
+        local base
+        base=$(basename "$f")
+        local dest="$SHARED_MEMORY_DIR/$base"
+        if [ -e "$dest" ] && ! diff -q "$f" "$dest" >/dev/null 2>&1; then
+            dest="$SHARED_MEMORY_DIR/${base%.md}_from_${description// /_}.md"
+        fi
+        cp -n "$f" "$dest" 2>/dev/null
+    done < <(find "$real_dir" -maxdepth 1 -name '*.md' -print0)
+    [ "$found" = 1 ] && echo -e "${GREEN}extracted: $description memory -> $SHARED_MEMORY_DIR${NC}"
+}
 
 setup_symlink() {
     local target_path=$1
@@ -36,6 +63,10 @@ setup_symlink() {
         return
     fi
 
+    if [ -d "$target_path" ] && [ ! -L "$target_path" ] && [ "$shared_source" = "$SHARED_MEMORY_DIR" ]; then
+        extract_memory "$target_path" "$description"
+    fi
+
     if [ -L "$target_path" ] || [ -d "$target_path" ]; then
         if [ -d "$target_path" ] && [ ! -L "$target_path" ]; then
             local backup="${target_path}.backup_${TIMESTAMP}"
@@ -50,7 +81,7 @@ setup_symlink() {
     echo -e "${GREEN}linked: $description -> $shared_source${NC}"
 }
 
-echo "--- Memory symlinks ---"
+echo "--- Memory symlinks (extracting existing memory first) ---"
 for project_dir in "$HOME/.claude/projects"/*; do
     [ -d "$project_dir" ] || continue
     setup_symlink "$project_dir/memory" "$SHARED_MEMORY_DIR" "Claude Code - $(basename "$project_dir")"
@@ -75,7 +106,53 @@ for project_dir in "$HOME/.claude/projects"/*; do
     setup_symlink "$project_dir/skills" "$SHARED_SKILLS_DIR" "Claude Code - $(basename "$project_dir")"
 done
 
+# Seed a personality/preferences file the instruction block below tells every
+# agent to read before responding. Never overwritten once created — it's the
+# user's file to edit.
+PERSONALITY_FILE="$SHARED_MEMORY_DIR/PERSONALITY.md"
+if [ ! -f "$PERSONALITY_FILE" ]; then
+    cat > "$PERSONALITY_FILE" <<'EOF'
+# User personality & preferences
+
+Fill this in (or let your agent append to it as it learns you): tone,
+communication style, standing preferences, pet peeves. Every agent sharing
+this memory dir reads this file first and adapts before responding.
+EOF
+    echo -e "${GREEN}created: $PERSONALITY_FILE (seed it or let the agent fill it in)${NC}"
+fi
+
+# Tell each agent, at its own global-instructions file, to read+update the
+# shared memory dir and read PERSONALITY.md before responding. Idempotent:
+# guarded by a marker comment, only appended once per file.
+MARKER="<!-- shared-ai-memory:auto -->"
+BLOCK=$(cat <<EOF
+
+$MARKER
+## Shared AI memory (auto-added by shared-ai-memory plugin)
+
+Before responding, read $SHARED_MEMORY_DIR/PERSONALITY.md and every other
+*.md file in $SHARED_MEMORY_DIR relevant to the request — this is memory
+shared across all your AI agents on this machine, not just this one. After
+learning a durable fact, preference, or correction, write/update the
+matching file in $SHARED_MEMORY_DIR so every other agent sees it too.
+EOF
+)
+
+inject_instructions() {
+    local f=$1
+    [ -f "$f" ] || return
+    grep -qF "$MARKER" "$f" 2>/dev/null && return
+    printf '%s\n' "$BLOCK" >> "$f"
+    echo -e "${GREEN}instructed: $f to read/update shared memory${NC}"
+}
+
+echo ""
+echo "--- Agent instruction files ---"
+inject_instructions "$HOME/.claude/CLAUDE.md"
+inject_instructions "$HOME/.codex/AGENTS.md"
+inject_instructions "$HOME/.config/opencode/AGENTS.md"
+inject_instructions "$HOME/.cursor/rules"
+
 echo ""
 echo "Done. Re-run this after major agent updates to restore broken symlinks."
-echo "Reminder: symlinks alone aren't enough — each agent's AGENTS.md/CLAUDE.md"
-echo "must also tell it to read the shared memory dir at session start."
+

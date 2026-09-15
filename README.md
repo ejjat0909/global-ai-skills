@@ -75,7 +75,7 @@ kinds:
 | Plugin | Type | What it does | Source |
 |--------|------|---------------|--------|
 | `camofox-browser` | npm | Installs `@askjo/camofox-browser` globally | github.com/jo-inc/camofox-browser |
-| `shared-ai-memory` | script | Symlinks every AI agent's memory/skills dir on this machine to `~/.shared-ai-memory` / `~/.shared-ai-skills` | authored in this repo |
+| `shared-ai-memory` | script | Extracts existing per-agent memory into `~/.shared-ai-memory`, symlinks every agent's memory/skills dir to it, seeds `PERSONALITY.md`, and appends a read/update-shared-memory instruction to each agent's global instructions file | authored in this repo |
 
 ```bash
 npx github:ejjat0909/global-ai-skills                 # skills + plugins (default)

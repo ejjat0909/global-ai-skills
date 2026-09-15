@@ -1,12 +1,13 @@
 ---
 name: pwa-page-redesign
-description: Use when redesigning any web page into its PWA version (component-based, no overflow, no emoji, light/dark mode complete).
+description: Use when redesigning OR building any web page/site (component-based, responsive/PWA sizing, no overflow, no emoji, light/dark mode complete).
 ---
 
 # PWA Page Redesign
 
-Trigger: user gives a page/URL and asks to redesign it "for the PWA version"
-(or "PWA-ify this page").
+Trigger: user asks to redesign an existing page "for the PWA version", OR
+asks to build/create a new page or website. Applies to new builds too — a new
+page must be responsive/PWA-ready from the first draft, not fixed up after.
 
 ## Non-negotiable rules
 
@@ -21,9 +22,11 @@ Trigger: user gives a page/URL and asks to redesign it "for the PWA version"
 3. **No emoji anywhere in the UI.** Replace every emoji with a real icon
    (lucide/heroicons/whatever icon set the project already uses). If an emoji
    was doing a job (status, action), the icon must do the same job.
-4. **No overflow at any screen size**, including popups/modals. Test at
-   mobile width (~360px) and make sure nothing clips or requires horizontal
-   scroll. Modals: `max-h-[90vh] overflow-y-auto`, content wraps, no fixed
+4. **Responsive at every breakpoint, no overflow.** Layout must reflow (not
+   just shrink) at mobile (~360-428px), tablet (~768px), and desktop. Use the
+   project's existing responsive utilities (Tailwind `sm:`/`md:`/`lg:` etc. or
+   equivalent) — don't ship a fixed desktop-only layout. This applies to
+   popups/modals too: `max-h-[90vh] overflow-y-auto`, content wraps, no fixed
    pixel widths wider than viewport.
 5. **Modal/popup header:** title + a single X icon button, same row, X at the
    top-right. No separate "Close" or "Cancel" button — the X is the only close
@@ -38,12 +41,20 @@ Trigger: user gives a page/URL and asks to redesign it "for the PWA version"
 
 ## Process
 
+**Redesigning an existing page:**
 1. Open the given page/route, read the current markup/component tree.
 2. List every UI element on the page and classify it against the component
    list above (existing component vs raw HTML vs emoji vs inline SVG).
 3. Rebuild using existing components, applying rules 2–7.
-4. Verify: resize to mobile width, open every modal, toggle light/dark mode,
-   confirm no overflow and no emoji remain.
+4. Verify: resize to mobile/tablet/desktop widths, open every modal, toggle
+   light/dark mode, confirm no overflow and no emoji remain.
+
+**Building a new page/website:**
+1. Apply rules 1–7 from the first draft — same rules, no separate "make it
+   responsive later" pass.
+2. Reuse existing components for every UI element in the list above; only
+   write raw markup for what the design system doesn't cover.
+3. Verify the same way: mobile/tablet/desktop widths, modals, light/dark mode.
 
 ## What NOT to do
 
@@ -51,3 +62,5 @@ Trigger: user gives a page/URL and asks to redesign it "for the PWA version"
   this is a component + overflow + theme pass, not a visual redesign.
 - Don't introduce a new component library; use what the project already has.
 - Don't add pagination/search/etc. that the original page didn't have.
+- Don't ship a new page/component desktop-only "for now" — responsive sizing
+  is part of done, not a follow-up ticket.

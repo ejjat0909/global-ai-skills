@@ -15,6 +15,10 @@ That guide is the authoritative, step-by-step procedure (A–Z) including the
 required testing commands. Do not improvise an approach, do not guess the repo
 layout, and do not skip the testing sections — the guide covers all of it.
 
+Writing a brand-new skill from scratch (not vendored from elsewhere)? Use
+`docs/ADDING-CUSTOM-SKILLS.md` instead — same repo/installer rules, focused on
+authoring `SKILL.md` frontmatter and content.
+
 ## Fast facts (the guide has the full detail)
 
 - Skills are folders under `skills/` containing a `SKILL.md`. The folder name

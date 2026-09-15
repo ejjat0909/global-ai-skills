@@ -31,7 +31,7 @@ jobs:
           node bin/install.js --help > /dev/null
           echo "installer OK"
 
-      - name: every skills/* folder has a top-level SKILL.md
+      - name: every skills/* folder has a top-level SKILL.md with name+description
         run: |
           fail=0
           for d in skills/*/; do
@@ -39,7 +39,10 @@ jobs:
             if [ ! -f "$name/SKILL.md" ]; then
               echo "::error::$name is missing a top-level SKILL.md"
               fail=1
+              continue
             fi
+            head -10 "$name/SKILL.md" | grep -q '^name:' || { echo "::error::$name/SKILL.md frontmatter missing 'name:'"; fail=1; }
+            head -10 "$name/SKILL.md" | grep -q '^description:' || { echo "::error::$name/SKILL.md frontmatter missing 'description:'"; fail=1; }
           done
           exit $fail
 
@@ -99,10 +102,13 @@ jobs:
           node bin/install.js --update --no-plugins --dir=/tmp/ci-install
           test ! -f /tmp/ci-install/mobile-app-setup/JUNK.md && echo "update drops stale files OK"
 
-      - name: root agent-instruction files exist and point at the guide
+      - name: root agent-instruction files exist and point at both guides
         run: |
           for f in AGENTS.md CLAUDE.md .cursorrules .github/copilot-instructions.md; do
             test -f "$f" || { echo "::error::missing $f"; exit 1; }
             grep -q "docs/ADDING-SKILLS-AND-PLUGINS.md" "$f" || { echo "::error::$f does not reference the A-Z guide"; exit 1; }
+            grep -q "docs/ADDING-CUSTOM-SKILLS.md" "$f" || { echo "::error::$f does not reference the custom-skill guide"; exit 1; }
           done
-          test -f docs/ADDING-SKILLS-AND-PLUGINS.md && echo "agent instruction files OK"
+          test -f docs/ADDING-SKILLS-AND-PLUGINS.md
+          test -f docs/ADDING-CUSTOM-SKILLS.md
+          echo "agent instruction files OK"

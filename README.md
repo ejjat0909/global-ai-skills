@@ -59,6 +59,7 @@ If nothing matching is installed there, it says so and does nothing.
 | `--anti-slop` | `antislop`, `antislop-code`, `antislop-copywriting`, `antislop-human`, `antislop-layoutmobile`, `antislop-ui` | github.com/miqdadbadjuber/anti-slop |
 | `--ecc` | 292 ECC skills (accessibility, api-design, agent-*, benchmark, brand-voice, security-review, tdd-workflow, …) | github.com/affaan-m/ecc |
 | `--pwa-page-redesign` | `pwa-page-redesign` | authored in this repo |
+| `--ponytail` | `ponytail`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`, `ponytail-review` | github.com/dietrichgebert/ponytail |
 
 `--anti-slop` and `--ecc` are groups: one flag installs all the folders in that
 bundle. Group membership is defined in `groups.json`.

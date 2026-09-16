@@ -63,6 +63,7 @@ If nothing matching is installed there, it says so and does nothing.
 | `--daisyui` | `daisyui` | github.com/saadeghi/daisyui |
 | `--watermelon-ui` | `watermelon-ui` | github.com/WatermelonCorp/watermelon-platform |
 | `--make-interfaces-feel-better-watermelon` | `make-interfaces-feel-better-watermelon` | github.com/WatermelonCorp/watermelon-platform |
+| `--archify` | `archify` | github.com/tt-a1i/archify |
 
 `--anti-slop` and `--ecc` are groups: one flag installs all the folders in that
 bundle. Group membership is defined in `groups.json`.

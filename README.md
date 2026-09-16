@@ -60,6 +60,7 @@ If nothing matching is installed there, it says so and does nothing.
 | `--ecc` | 292 ECC skills (accessibility, api-design, agent-*, benchmark, brand-voice, security-review, tdd-workflow, …) | github.com/affaan-m/ecc |
 | `--pwa-page-redesign` | `pwa-page-redesign` | authored in this repo |
 | `--ponytail` | `ponytail`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`, `ponytail-review` | github.com/dietrichgebert/ponytail |
+| `--daisyui` | `daisyui` | github.com/saadeghi/daisyui |
 
 `--anti-slop` and `--ecc` are groups: one flag installs all the folders in that
 bundle. Group membership is defined in `groups.json`.

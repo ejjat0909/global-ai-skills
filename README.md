@@ -62,6 +62,7 @@ If nothing matching is installed there, it says so and does nothing.
 | `--ponytail` | `ponytail`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`, `ponytail-review` | github.com/dietrichgebert/ponytail |
 | `--daisyui` | `daisyui` | github.com/saadeghi/daisyui |
 | `--watermelon-ui` | `watermelon-ui` | github.com/WatermelonCorp/watermelon-platform |
+| `--security-audit` | `security-audit` | github.com/cloudflare/security-audit-skill |
 | `--make-interfaces-feel-better-watermelon` | `make-interfaces-feel-better-watermelon` | github.com/WatermelonCorp/watermelon-platform |
 | `--archify` | `archify` | github.com/tt-a1i/archify |
 
